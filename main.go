@@ -38,5 +38,3 @@ func main() {
 	}
 	fmt.Println("Thanks for using Pass-Man!")
 }
-
-func gateKeeper()
