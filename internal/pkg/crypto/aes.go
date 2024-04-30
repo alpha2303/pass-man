@@ -12,7 +12,7 @@ import (
 	argon2 "golang.org/x/crypto/argon2"
 )
 
-type cryptoParams struct {
+type CryptoParams struct {
 	memory     uint32
 	iterations uint32
 	threads    uint8
@@ -21,7 +21,7 @@ type cryptoParams struct {
 }
 
 var (
-	DefaultParams = &cryptoParams{
+	DefaultParams = &CryptoParams{
 		memory:     64 * 1024,
 		iterations: 1,
 		threads:    4,
@@ -32,7 +32,7 @@ var (
 	ErrIncompatibleVersion = errors.New("encryption version is incompatible")
 )
 
-func Encrypt(srcBytes []byte, masterPassword []byte, params *cryptoParams) (string, error) {
+func Encrypt(srcBytes []byte, masterPassword []byte, params *CryptoParams) (string, error) {
 	salt, err := generateRandomBytes(params.saltLength)
 
 	if err != nil {
@@ -110,7 +110,7 @@ func Decrypt(encodedData string, masterPassword []byte) ([]byte, error) {
 	return destBytes, nil
 }
 
-func decodeData(encodedData string) (*cryptoParams, []byte, []byte, error) {
+func decodeData(encodedData string) (*CryptoParams, []byte, []byte, error) {
 	values := strings.Split(encodedData, "$")
 
 	if len(values) != 6 {
@@ -138,8 +138,8 @@ func decodeData(encodedData string) (*cryptoParams, []byte, []byte, error) {
 		return nil, nil, nil, err
 	}
 
-	params := &cryptoParams{}
-	if _, err := fmt.Sscanf(values[5], "%d,%d,%d", params.iterations, params.memory, params.threads); err != nil {
+	params := &CryptoParams{}
+	if _, err := fmt.Sscanf(values[5], "%d,%d,%d", &(params.iterations), &(params.memory), &(params.threads)); err != nil {
 		return nil, nil, nil, err
 	}
 
@@ -149,7 +149,7 @@ func decodeData(encodedData string) (*cryptoParams, []byte, []byte, error) {
 	return params, data, salt, nil
 }
 
-func generateKey(masterPassword []byte, salt []byte, params *cryptoParams) ([]byte, error) {
+func generateKey(masterPassword []byte, salt []byte, params *CryptoParams) ([]byte, error) {
 
 	return argon2.IDKey(
 		masterPassword,

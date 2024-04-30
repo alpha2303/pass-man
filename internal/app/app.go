@@ -8,8 +8,7 @@ import (
 )
 
 func HandleVaultCreate() {
-	var vaultName string
-	extras.Input("Enter vault name: ", &vaultName)
+	vaultName := extras.Input("Enter vault name: ")
 	vaultMeta := vault.CreateVaultMeta(vaultName)
 
 	if vaultMeta.IsExists() {
@@ -20,15 +19,16 @@ func HandleVaultCreate() {
 	var password string
 	extras.SilentInput("Enter password for vault: ", &password)
 
-	_, err := vault.CreateVault(vaultMeta, password)
+	_, err := vault.CreateVault(&vaultMeta, password)
 	if err != nil {
 		fmt.Printf("%s", err.Error())
+		return
 	}
+	fmt.Printf("Vault '%s' has been successfully created.", vaultName)
 }
 
 func HandleVaultSignIn() {
-	var vaultName string
-	extras.Input("Enter vault name: ", &vaultName)
+	vaultName := extras.Input("Enter vault name: ")
 	vaultMeta := vault.CreateVaultMeta(vaultName)
 
 	if !vaultMeta.IsExists() {
@@ -39,14 +39,13 @@ func HandleVaultSignIn() {
 	var password string
 	extras.SilentInput("Enter password for vault: ", &password)
 
-	if _, err := vault.OpenVault(vaultMeta, password); err != nil {
+	if _, err := vault.OpenVault(&vaultMeta, password); err != nil {
 		fmt.Printf("%s", err.Error())
 	}
 }
 
 func HandleVaultDelete() {
-	var vaultName string
-	extras.Input("Enter vault name: ", &vaultName)
+	vaultName := extras.Input("Enter vault name: ")
 	vaultMeta := vault.CreateVaultMeta(vaultName)
 
 	if !vaultMeta.IsExists() {
@@ -57,14 +56,13 @@ func HandleVaultDelete() {
 	var password string
 	extras.SilentInput("Enter password for vault: ", &password)
 
-	vault_obj, err := vault.OpenVault(vaultMeta, password)
+	vault_obj, err := vault.OpenVault(&vaultMeta, password)
 	if err != nil {
 		fmt.Printf("%s", err.Error())
 		return
 	}
 
-	var choice string
-	extras.Input("Are you sure you want to delete this vault? [Y/n]", &choice)
+	choice := extras.Input("Are you sure you want to delete this vault? [Y/n]")
 
 	if choice == "Y" {
 		vault_obj.Delete()
@@ -75,8 +73,8 @@ func HandleVaultDelete() {
 }
 
 func requestCredentials() (string, string) {
-	var vaultName, password string
-	extras.Input("Enter vault name: ", &vaultName)
+	var password string
+	vaultName := extras.Input("Enter vault name: ")
 	extras.SilentInput("Enter password: ", &password)
 
 	return vaultName, password

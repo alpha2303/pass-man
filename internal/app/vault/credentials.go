@@ -1,13 +1,13 @@
 package vault
 
-type Credentials struct {
-	username string
-	password string
+type Credential struct {
+	Username string
+	Password string
 }
 
-func CreateCredentials(username string, password string) Credentials {
-	return Credentials{
-		username: username,
-		password: password,
+func CreateCredential(username string, password string) Credential {
+	return Credential{
+		Username: username,
+		Password: password,
 	}
 }
