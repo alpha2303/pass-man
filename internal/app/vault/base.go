@@ -110,12 +110,10 @@ func Explore(v *Vault, password string) error {
 }
 
 func handleCreateCredentials(v *Vault) {
-	var password string
-
 	name := extras.Input("\nName this credential: ")
 	fmt.Println("Enter credentials -")
 	username := extras.Input("Username: ")
-	extras.SilentInput("Password: ", &password)
+	password := extras.SilentInput("Password: ")
 
 	credential := CreateCredential(username, password)
 
@@ -159,6 +157,7 @@ func handleSeeCredential(v *Vault) {
 
 	if !ok {
 		fmt.Println("A credential with the provided name does not exist.")
+		return
 	}
 
 	fmt.Printf("Username: %s \n", cred.Username)

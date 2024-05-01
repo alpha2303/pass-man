@@ -19,11 +19,15 @@ func Input(prompt string) string {
 	return strref
 }
 
-func SilentInput(prompt string, strref *string) {
+func SilentInput(prompt string) string {
+	var strref string
+
 	fmt.Printf("%s", prompt)
 	fmt.Print("\033[8m")
-	if _, err := fmt.Scanln(strref); err != nil {
+	if _, err := fmt.Scanln(&strref); err != nil {
 		fmt.Println(err.Error())
 	}
 	fmt.Print("\033[28m")
+
+	return strref
 }

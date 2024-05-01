@@ -8,16 +8,13 @@ import (
 )
 
 func HandleVaultCreate() {
-	vaultName := extras.Input("Enter vault name: ")
-	vaultMeta := vault.CreateVaultMeta(vaultName)
+	vaultName, password := requestCredentials()
 
+	vaultMeta := vault.CreateVaultMeta(vaultName)
 	if vaultMeta.IsExists() {
 		fmt.Printf("Vault named '%s' already exists.", vaultName)
 		return
 	}
-
-	var password string
-	extras.SilentInput("Enter password for vault: ", &password)
 
 	_, err := vault.CreateVault(&vaultMeta, password)
 	if err != nil {
@@ -28,16 +25,14 @@ func HandleVaultCreate() {
 }
 
 func HandleVaultSignIn() {
-	vaultName := extras.Input("Enter vault name: ")
+	vaultName, password := requestCredentials()
+
 	vaultMeta := vault.CreateVaultMeta(vaultName)
 
 	if !vaultMeta.IsExists() {
 		fmt.Printf("Vault named '%s' does not exist.", vaultName)
 		return
 	}
-
-	var password string
-	extras.SilentInput("Enter password for vault: ", &password)
 
 	vaultObj, err := vault.OpenVault(&vaultMeta, password)
 
@@ -52,16 +47,14 @@ func HandleVaultSignIn() {
 }
 
 func HandleVaultDelete() {
-	vaultName := extras.Input("Enter vault name: ")
+	vaultName, password := requestCredentials()
+
 	vaultMeta := vault.CreateVaultMeta(vaultName)
 
 	if !vaultMeta.IsExists() {
 		fmt.Printf("Vault named '%s' does not exist.", vaultName)
 		return
 	}
-
-	var password string
-	extras.SilentInput("Enter password for vault: ", &password)
 
 	vault_obj, err := vault.OpenVault(&vaultMeta, password)
 	if err != nil {
@@ -80,9 +73,8 @@ func HandleVaultDelete() {
 }
 
 func requestCredentials() (string, string) {
-	var password string
 	vaultName := extras.Input("Enter vault name: ")
-	extras.SilentInput("Enter password: ", &password)
+	password := extras.SilentInput("Enter password: ")
 
 	return vaultName, password
 }
