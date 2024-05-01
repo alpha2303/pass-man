@@ -14,9 +14,9 @@ func (vm *VaultMeta) GetPath() string {
 }
 
 func (vm *VaultMeta) IsExists() bool {
-	_, err := os.Stat(vm.path)
-	if err != nil {
+	if _, err := os.Stat(vm.path); err != nil {
 		return false
 	}
+
 	return true
 }
