@@ -56,7 +56,7 @@ func HandleVaultDelete() {
 		return
 	}
 
-	vault_obj, err := vault.OpenVault(&vaultMeta, password)
+	vaultObj, err := vault.OpenVault(&vaultMeta, password)
 	if err != nil {
 		fmt.Printf("%s", err.Error())
 		return
@@ -65,7 +65,7 @@ func HandleVaultDelete() {
 	choice := extras.Input("Are you sure you want to delete this vault [Y/n]? : ")
 
 	if choice == "Y" {
-		vault_obj.Delete()
+		vaultObj.Delete()
 		if err != nil {
 			fmt.Printf("%s", err.Error())
 		}

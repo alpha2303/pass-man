@@ -1,7 +1,6 @@
 package connector
 
 import (
-	"io/fs"
 	"os"
 )
 
@@ -25,7 +24,7 @@ func (f FileConnector) Read() ([]byte, error) {
 }
 
 func (f FileConnector) Update(dataString string) error {
-	if err := os.WriteFile(f.filepath, []byte(dataString), fs.FileMode(os.O_WRONLY)); err != nil {
+	if err := os.WriteFile(f.filepath, []byte(dataString), os.FileMode(os.O_WRONLY)); err != nil {
 		return err
 	}
 
