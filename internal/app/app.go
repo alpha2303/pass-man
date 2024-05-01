@@ -39,7 +39,14 @@ func HandleVaultSignIn() {
 	var password string
 	extras.SilentInput("Enter password for vault: ", &password)
 
-	if _, err := vault.OpenVault(&vaultMeta, password); err != nil {
+	vaultObj, err := vault.OpenVault(&vaultMeta, password)
+
+	if err != nil {
+		fmt.Printf("%s", err.Error())
+		return
+	}
+
+	if err = vault.Explore(vaultObj, password); err != nil {
 		fmt.Printf("%s", err.Error())
 	}
 }
@@ -62,7 +69,7 @@ func HandleVaultDelete() {
 		return
 	}
 
-	choice := extras.Input("Are you sure you want to delete this vault? [Y/n]")
+	choice := extras.Input("Are you sure you want to delete this vault [Y/n]? : ")
 
 	if choice == "Y" {
 		vault_obj.Delete()

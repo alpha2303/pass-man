@@ -144,7 +144,7 @@ func decodeData(encodedData string) (*CryptoParams, []byte, []byte, error) {
 	}
 
 	params.saltLength = uint32(len(salt))
-	params.keyLength = uint32(len(salt))
+	params.keyLength = uint32(32)
 
 	return params, data, salt, nil
 }

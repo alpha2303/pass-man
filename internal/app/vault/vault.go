@@ -15,7 +15,8 @@ var (
 
 type Vault struct {
 	meta        VaultMeta
-	Credentials map[string]Credential
+	isSignedIn  bool
+	credentials map[string]Credential
 }
 
 func (v *Vault) Create(password string) error {
@@ -48,7 +49,7 @@ func (v *Vault) Open(password string) error {
 	}
 
 	if len(encryptedBytes) == 0 {
-		v.Credentials = make(map[string]Credential, 0)
+		v.credentials = make(map[string]Credential, 0)
 	}
 
 	vaultBytes, err := crypto.Decrypt(string(encryptedBytes[:]), []byte(password))
@@ -59,6 +60,8 @@ func (v *Vault) Open(password string) error {
 	if err := v.fromBinary(vaultBytes); err != nil {
 		return err
 	}
+
+	v.isSignedIn = true
 
 	return nil
 }
@@ -98,18 +101,18 @@ func (v *Vault) Save(password string) error {
 }
 
 func (v *Vault) add(name string, credential Credential) {
-	v.Credentials[name] = credential
+	v.credentials[name] = credential
 }
 
 func (v *Vault) remove(name string) {
-	delete(v.Credentials, name)
+	delete(v.credentials, name)
 }
 
 func (v *Vault) toBinary() ([]byte, error) {
 	var vaultBytes bytes.Buffer
 	encoder := gob.NewEncoder(&vaultBytes)
 
-	if err := encoder.Encode(*v); err != nil {
+	if err := encoder.Encode(v.credentials); err != nil {
 		return nil, err
 	}
 
@@ -120,9 +123,12 @@ func (v *Vault) fromBinary(vaultBytes []byte) error {
 	readBuffer := bytes.NewBuffer(vaultBytes)
 	decoder := gob.NewDecoder(readBuffer)
 
-	if err := decoder.Decode(v); err != nil {
+	var credentials map[string]Credential
+	if err := decoder.Decode(&credentials); err != nil {
 		return err
 	}
+
+	v.credentials = credentials
 
 	return nil
 }

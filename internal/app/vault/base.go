@@ -1,6 +1,7 @@
 package vault
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -10,9 +11,10 @@ import (
 )
 
 var (
-	DefaultPath    string = "./.vault"
-	DefaultFileExt string = "pmv"
-	VaultPerm             = os.FileMode(int(0755))
+	DefaultPath    string      = "./.vault"
+	DefaultFileExt string      = "pmv"
+	VaultPerm      os.FileMode = os.FileMode(int(0755))
+	ErrAuthAccess  error       = errors.New("unauthenticated vault access")
 )
 
 func GetVaultCount() (int, error) {
@@ -45,7 +47,7 @@ func CreateVaultMeta(name string) VaultMeta {
 func CreateVault(vm *VaultMeta, password string) (bool, error) {
 	vault := Vault{
 		meta:        *vm,
-		Credentials: nil,
+		credentials: nil,
 	}
 
 	if err := vault.Create(password); err != nil {
@@ -58,7 +60,7 @@ func CreateVault(vm *VaultMeta, password string) (bool, error) {
 func OpenVault(vm *VaultMeta, password string) (*Vault, error) {
 	vault := Vault{
 		meta:        *vm,
-		Credentials: nil,
+		credentials: nil,
 	}
 
 	err := vault.Open(password)
@@ -66,33 +68,38 @@ func OpenVault(vm *VaultMeta, password string) (*Vault, error) {
 		return nil, err
 	}
 
-	if err = explore(vault, password); err != nil {
-		return nil, err
-	}
-
 	return &vault, nil
 }
 
-func explore(v Vault, password string) error {
+func Explore(v *Vault, password string) error {
+	if !v.isSignedIn {
+		return ErrAuthAccess
+	}
+
 	var choice int = 1
 
 	for choice != 0 {
-		fmt.Printf("What would you like to do?")
+		fmt.Println("\nWhat would you like to do?")
 		fmt.Println("1. Add New Credential")
 		fmt.Println("2. Remove Credential")
+		fmt.Println("3. See Credential")
+		fmt.Println("0. Go Back")
 
-		choice, err := strconv.ParseInt(extras.Input("Enter your choice: "), 10, 32)
+		choice, err := strconv.ParseInt(extras.Input("\nEnter your choice: "), 10, 32)
 		if err != nil {
 			return err
 		}
 
 		switch choice {
 		case 1:
-			handleCreateCredentials(&v)
+			handleCreateCredentials(v)
 		case 2:
-			handleRemoveCredentials(&v)
+			handleRemoveCredentials(v)
+		case 3:
+			handleSeeCredential(v)
 		default:
 			choice = 0
+			return nil
 		}
 
 		if err := v.Save(password); err != nil {
@@ -105,16 +112,20 @@ func explore(v Vault, password string) error {
 func handleCreateCredentials(v *Vault) {
 	var password string
 
-	name := extras.Input("Name this credential: ")
+	name := extras.Input("\nName this credential: ")
 	fmt.Println("Enter credentials -")
 	username := extras.Input("Username: ")
 	extras.SilentInput("Password: ", &password)
 
 	credential := CreateCredential(username, password)
 
+	if v.credentials == nil {
+		v.credentials = make(map[string]Credential)
+	}
+
 	var choice string = "Y"
-	if _, ok := v.Credentials[name]; !ok {
-		choice = extras.Input("A credential with this already exists.\nWould you like to replace it? [Y/n]")
+	if _, ok := v.credentials[name]; ok {
+		choice = extras.Input("A credential with this already exists.\nWould you like to replace it [Y/n]? : ")
 	}
 
 	if choice == "Y" {
@@ -127,16 +138,29 @@ func handleCreateCredentials(v *Vault) {
 func handleRemoveCredentials(v *Vault) {
 	name := extras.Input("Enter Credential Name: ")
 
-	if _, ok := v.Credentials[name]; !ok {
+	if _, ok := v.credentials[name]; !ok {
 		fmt.Println("A credential with the provided name does not exist.")
+		return
 	}
 
-	choice := extras.Input("This credential will be permanently deleted. Are you sure? [Y/n]")
+	choice := extras.Input("\nThis credential will be permanently deleted. Are you sure [Y/n]? : ")
 	if choice == "Y" {
 		v.remove(name)
 		fmt.Printf("Credential '%s' has been deleted.", name)
 	} else {
 		fmt.Println("Removal operation cancelled.")
 	}
+}
 
+func handleSeeCredential(v *Vault) {
+	name := extras.Input("Enter Credential Name: ")
+
+	cred, ok := v.credentials[name]
+
+	if !ok {
+		fmt.Println("A credential with the provided name does not exist.")
+	}
+
+	fmt.Printf("Username: %s \n", cred.Username)
+	fmt.Printf("Password: %s \n", cred.Password)
 }
