@@ -5,16 +5,16 @@ import (
 )
 
 type VaultMeta struct {
-	name string
-	path string
+	name *string
+	path *string
 }
 
 func (vm *VaultMeta) GetPath() string {
-	return vm.path
+	return *vm.path
 }
 
 func (vm *VaultMeta) IsExists() bool {
-	if _, err := os.Stat(vm.path); err != nil {
+	if _, err := os.Stat(*vm.path); err != nil {
 		return false
 	}
 

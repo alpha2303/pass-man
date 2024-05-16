@@ -22,7 +22,7 @@ func main() {
 
 		if err != nil {
 			fmt.Printf("error occured: %s\n", err.Error())
-			break
+			continue
 		}
 
 		switch choice {

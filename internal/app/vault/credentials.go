@@ -1,12 +1,14 @@
 package vault
 
 type Credential struct {
+	Domain   string
 	Username string
 	Password string
 }
 
-func CreateCredential(username string, password string) Credential {
+func CreateCredential(domain string, username string, password string) Credential {
 	return Credential{
+		Domain:   domain,
 		Username: username,
 		Password: password,
 	}
