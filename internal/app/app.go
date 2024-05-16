@@ -88,6 +88,7 @@ func explore(v *vault.Vault, password string) error {
 		fmt.Println("1. Add New Credential")
 		fmt.Println("2. Remove Credential")
 		fmt.Println("3. See Credential")
+		fmt.Println("4. Display Credential Names")
 		fmt.Println("0. Go Back")
 
 		choice, err := strconv.ParseInt(extras.Input("\nEnter your choice: "), 10, 32)
@@ -102,6 +103,8 @@ func explore(v *vault.Vault, password string) error {
 			handleRemoveCredentials(v)
 		case 3:
 			handleSeeCredential(v)
+		case 4:
+			handleDisplayNames(v)
 		default:
 			choice = 0
 			return nil
@@ -170,6 +173,19 @@ func handleSeeCredential(v *vault.Vault) {
 
 	fmt.Printf("Username: %s \n", cred.Username)
 	fmt.Printf("Password: %s \n", cred.Password)
+}
+
+func handleDisplayNames(v *vault.Vault) {
+	credentials, err := v.GetAllCredentials()
+	count := 1
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
+	for key, _ := range *credentials {
+		fmt.Printf("%d. %s\n", count, key)
+		count++
+	}
 }
 
 func requestCredentials() (string, string) {
