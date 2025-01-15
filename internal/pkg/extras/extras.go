@@ -1,11 +1,15 @@
 package extras
 
-import "fmt"
+import (
+	"bufio"
+	"fmt"
+	"os"
+)
 
 func Input(prompt string) string {
 	var strref string
 	fmt.Printf("%s", prompt)
-	if _, err := fmt.Scanln(&strref); err != nil {
+	if err := readLine(&strref); err != nil {
 		fmt.Println(err.Error())
 	}
 	return strref
@@ -16,10 +20,17 @@ func SilentInput(prompt string) string {
 
 	fmt.Printf("%s", prompt)
 	fmt.Print("\033[8m")
-	if _, err := fmt.Scanln(&strref); err != nil {
+	if err := readLine(&strref); err != nil {
 		fmt.Println(err.Error())
 	}
 	fmt.Print("\033[28m")
 
 	return strref
+}
+
+func readLine(strref *string) error {
+	scanner := bufio.NewScanner(os.Stdin)
+	scanner.Scan()
+	*strref = scanner.Text()
+	return scanner.Err()
 }

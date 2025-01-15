@@ -51,14 +51,15 @@ func HandleVaultSignIn() {
 }
 
 func HandleVaultDelete() {
-	vaultName, password := requestCredentials()
-
+	vaultName := extras.Input("Enter vault name: ")
 	vaultMeta := vault.CreateVaultMeta(&vaultName)
 
 	if !vaultMeta.IsExists() {
 		fmt.Printf("Vault named '%s' does not exist.", vaultName)
 		return
 	}
+
+	password := extras.SilentInput("Enter password: ")
 
 	vaultObj, err := vault.OpenVault(&vaultMeta, &password)
 	if err != nil {
@@ -104,7 +105,7 @@ func explore(v *vault.Vault, password string) error {
 		case 3:
 			handleSeeCredential(v)
 		case 4:
-			handleDisplayNames(v)
+			handleSeeAllCredNames(v)
 		default:
 			choice = 0
 			return nil
@@ -119,7 +120,7 @@ func explore(v *vault.Vault, password string) error {
 
 func handleCreateCredentials(v *vault.Vault) {
 	name := extras.Input("\nName this credential: ")
-	fmt.Println("Enter credentials -")
+	fmt.Println("** Enter credentials **")
 	domain := extras.Input("Domain: ")
 	username := extras.Input("Username: ")
 	password := extras.SilentInput("Password: ")
@@ -134,6 +135,8 @@ func handleCreateCredentials(v *vault.Vault) {
 	if choice == "Y" {
 		if err := v.AddCredential(name, credential); err != nil {
 			fmt.Println(err.Error())
+		} else {
+			fmt.Printf("Credential '%s' has been created.", name)
 		}
 		return
 	}
@@ -153,8 +156,9 @@ func handleRemoveCredentials(v *vault.Vault) {
 	if choice == "Y" {
 		if err := v.RemoveCredential(name); err != nil {
 			fmt.Println(err.Error())
+		} else {
+			fmt.Printf("Credential '%s' has been deleted.", name)
 		}
-		fmt.Printf("Credential '%s' has been deleted.", name)
 		return
 	}
 
@@ -175,14 +179,14 @@ func handleSeeCredential(v *vault.Vault) {
 	fmt.Printf("Password: %s \n", cred.Password)
 }
 
-func handleDisplayNames(v *vault.Vault) {
+func handleSeeAllCredNames(v *vault.Vault) {
 	credentials, err := v.GetAllCredentials()
 	count := 1
 	if err != nil {
 		fmt.Println(err.Error())
 		return
 	}
-	for key, _ := range *credentials {
+	for key := range *credentials {
 		fmt.Printf("%d. %s\n", count, key)
 		count++
 	}
